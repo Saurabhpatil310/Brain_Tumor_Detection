@@ -9,6 +9,7 @@ from keras.utils import normalize
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPool2D
 from keras.layers import  Activation, Dropout, Dense, Flatten
+from keras.utils import to_categorical
 
 image_directory='datasets/'
 
@@ -65,6 +66,9 @@ x_train, x_test, y_train, y_test=train_test_split(dataset,label, test_size=0.2, 
 x_train=normalize(x_train,axis=1)
 x_test=normalize(x_test,axis=1)
 
+y_train= to_categorical(y_train, num_classes=2) #for Categorical Entropy
+y_test= to_categorical(y_test, num_classes=2)   #
+
 #Model Building 
 # 64,64,3
  
@@ -86,14 +90,15 @@ model.add(Flatten())
 model.add(Dense(64))
 model.add(Activation('relu'))
 model.add(Dropout(0.5))
-model.add(Dense(1))  #1-bcos op is yes and no which is binary classification problem
-model.add(Activation('sigmoid')) #Activation function
+model.add(Dense(2))  #1-bcos op is yes and no which is binary classification problem & 2 for Categorical CrossEntropy
+model.add(Activation('softmax')) #Activation function
 
 # Binary CrossEntropy = 1, sigmoid
 # Categorical CrossEntropy = 2, softmax
 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+# model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']) #accuracy: 0.9908
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy']) #accuracy: 0.9954
 
 model.fit(x_train,y_train,batch_size= 16,verbose=1,epochs=10,validation_data=(x_test,y_test ),shuffle=False)
 
-model.save('Braintumor10Epochs.h5')
+model.save('Braintumor10EpochsCategorical.h5')

@@ -1,10 +1,11 @@
 import os
+import tensorflow as tf
 import numpy as np
 from PIL import Image
 import cv2
 from keras.models import load_model
-from flask import Flask
-
+from flask import Flask,request, render_template
+from werkzeug.utils import secure_filename
 
 app= Flask(__name__)
 
@@ -27,3 +28,20 @@ def getResult(img):
     result=model.predict(input_img)
     return result
 
+@app.route('/', methods =['GET'])
+def index():
+    return('index.html')
+
+@app.route('/predict',methods=['GET','POST'])  # type: ignore
+def upload():
+    if request.method=='POST':
+        f=request.files['file']
+
+        basepath = os.path.dirname(__file__)
+        file_path = os.path.join(
+            basepath, 'uploads', secure_filename(f.filename)) # type: ignore
+        f.save(file_path)
+        value=getResult(file_path)
+        result=get_className(value)
+        return result
+    return None

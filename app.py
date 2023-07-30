@@ -18,30 +18,39 @@ def get_className(classNo):
         return "No Brain Tumor"
     elif classNo ==1:
         return "Yes Brain Tumor"
-    
+
 def getResult(img):
-    image=cv2.imread(img)
-    image=Image.fromarray(img,'RGB')
-    image= image.resize((64,64))
-    image=np.array(image)
-    input_img=np.expand_dims(image, axis=0)
-    result=model.predict(input_img)
+    image = cv2.imread(img)  # Read the image using OpenCV
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+
+    # Resize the image
+    image = Image.fromarray(image)  # Convert to PIL Image
+    image = image.resize((64, 64))
+    image = np.array(image)
+
+    input_img = np.expand_dims(image, axis=0)
+    result = model.predict(input_img)
     return result
+
+
 
 @app.route('/', methods =['GET'])
 def index():
-    return('index.html')
+    return render_template('index.html')
 
-@app.route('/predict',methods=['GET','POST'])  # type: ignore
+@app.route('/predict',methods=['GET','POST'])  
 def upload():
     if request.method=='POST':
         f=request.files['file']
 
         basepath = os.path.dirname(__file__)
         file_path = os.path.join(
-            basepath, 'uploads', secure_filename(f.filename)) # type: ignore
+            basepath, 'uploads', secure_filename(f.filename)) 
         f.save(file_path)
         value=getResult(file_path)
         result=get_className(value)
         return result
     return None
+
+if __name__== '__main__':
+    app.run(debug=True)
